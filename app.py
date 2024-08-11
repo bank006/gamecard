@@ -5,9 +5,10 @@ import threading
 import itertools
 import pandas as pd
 import numpy as np
+import secrets
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = secrets.token_hex(16)
 socketio = SocketIO(app, async_mode='threading')
 
 rooms = {}

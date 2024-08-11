@@ -6,7 +6,8 @@ COPY . /app
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN pip install eventlet
 
-EXPOSE 5000
+EXPOSE 8080
 
-CMD ["gunicorn", "-c", "gunicorn_config.py", "app:app"]
+CMD ["gunicorn", "-k", "eventlet", "-b", "0.0.0.0:8080", "app:app"]
