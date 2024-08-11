@@ -9,7 +9,7 @@ import secrets
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}) 
+CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}}) 
 app.config['SECRET_KEY'] = secrets.token_hex(16)
 socketio = SocketIO(app, async_mode='threading' , cors_allowed_origins="*")
 
