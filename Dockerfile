@@ -7,6 +7,9 @@ WORKDIR /app
 # คัดลอกไฟล์ทั้งหมดไปยัง working directory
 COPY . /app
 
+# อัปเดต pip
+RUN pip install --upgrade pip
+
 # ติดตั้ง dependencies
 RUN pip install -r requirements.txt
 
