@@ -10,7 +10,7 @@ import secrets
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "https://web-production-8562.up.railway.app"}})
 socketio = SocketIO(app, async_mode='threading')
 
 rooms = {}
