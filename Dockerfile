@@ -13,5 +13,5 @@ RUN pip install -r requirements.txt
 # กำหนดพอร์ตที่แอปพลิเคชันจะฟัง
 EXPOSE 5000
 
-CMD ["gunicorn", "--bind", "127.0.0.1:5000", "app:app"]
+CMD ["gunicorn", "-c", "gunicorn_config.py", "app:app"]
 
