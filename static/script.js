@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const socket = io({
+    const socket = io('https://web-production-8562.up.railway.app',{
         reconnectionAttempts: Infinity,  // Keep trying to reconnect indefinitely
         reconnectionDelay: 1000,         // Initial delay between reconnection attempts (1 second)
         reconnectionDelayMax: 2000,      // Maximum delay between reconnection attempts (5 seconds)

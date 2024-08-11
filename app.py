@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
-from flask_cors import CORS
 import random
 import threading
 import itertools
@@ -10,8 +9,7 @@ import secrets
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)
-CORS(app, resources={r"/*": {"origins": "https://web-production-8562.up.railway.app"}})
-socketio = SocketIO(app, async_mode='threading')
+socketio = SocketIO(app, async_mode='threading' , cors_allowed_origins="*")
 
 rooms = {}
 
