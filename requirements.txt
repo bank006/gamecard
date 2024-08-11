@@ -44,3 +44,4 @@ urllib3==2.2.2
 Werkzeug==3.0.3
 wsproto==1.2.0
 zipp==3.19.2
+numpy==2.0.1
