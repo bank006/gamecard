@@ -9,7 +9,7 @@ import secrets
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)
-socketio = SocketIO(app, async_mode='threading')
+socketio = SocketIO(app, async_mode='threading' , cors_allowed_origins="*")
 
 rooms = {}
 
