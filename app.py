@@ -6,8 +6,10 @@ import itertools
 import pandas as pd
 import numpy as np
 import secrets
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}}) 
 app.config['SECRET_KEY'] = secrets.token_hex(16)
 socketio = SocketIO(app, async_mode='threading' , cors_allowed_origins="*")
 
