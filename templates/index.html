@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Game</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="/static/script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Card Game</h1>
+    </header>
+    <div class="container">
+        <div id="lobby">
+            <input type="text" id="username" placeholder="Enter your name">
+            <input type="text" id="roomCode" placeholder="Enter room code">
+            <button id="createRoomBtn" onclick="createRoom()">Create Room</button>
+            <button id="joinRoomBtn" onclick="joinRoom()">Join Room</button>
+        </div>
+        
+        <div id="game" style="display: none;">
+            <div id="roomDisplay"></div>
+            <div id="dealer"></div>
+            <div id="currentTurn"></div>
+            <div id="scoresTableContainer">
+                <h3>Scores</h3>
+                <table id="scoresTable">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Total Score</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Player rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="queueList"></div>
+
+           
+           
+            <div id="deck" class="hidden">   
+                <h2>Your Hand</h2>
+                <div id="hand" class="card-container"></div>
+                <div id="selection">
+                    <h3>Top Row</h3>
+                    <div id="top-row" class="card-slot-container"></div>
+                    <h3>Bottom Row</h3>
+                    <div id="bottom-row" class="card-slot-container"></div>
+                </div>
+                <button id="confirm" onclick="confirmSelection()">Confirm</button>
+                <button id="fold" onclick="fold()">Fold</button>
+                <button id="clear" onclick="clearSelection()">Clear</button>
+                <div id="players"></div>
+                <div id="roundScoreDisplay" style="margin-bottom: 10px;"></div>
+              
+                <button id="leaveGameBtn" onclick="leaveGame()">Leave Game</button>
+                <button id="showResult" class="disabled" disabled onclick="showResult()">Show Result</button> <!-- Moved Here -->
+                <button id="nextTurn" onclick="nextTurn()" disabled>Next Turn</button>
+                <button id="controls-admin" onclick="controls()">ADMIN</button>
+            </div>
+            <input type="hidden" id="roomCode" value="your-room-code">
+
+            <div id="gameStart">
+                <button onclick="startGame()">Start Game</button>
+            </div>
+           
+            <div id="confirmationBox">
+                <h2>History Logs</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="roundEndModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="playersContainer"></div>
+            <button id="closeModal" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+    
+
+</body>
+</html>

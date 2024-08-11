@@ -1,0 +1,334 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('bg.jpg'); /* Replace with the relative path to your image */
+    background-size: cover; /* This makes the background cover the entire page */
+    background-position: center; /* This centers the background image */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-attachment: fixed; /* Keeps the background image fixed while scrolling */
+}
+header {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#lobby, #game {
+    margin-top: 20px;
+}
+
+input[type="text"] {
+    width: calc(50% - 22px);
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button.disabled {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
+button#fold {
+    background-color: red;
+    color: white;
+}
+
+button#leaveGame {
+    background-color: black;
+    color: white;
+}
+
+#players {
+    margin-bottom: 20px;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Rainbow border animation */
+
+
+.card {
+    width: 75px;
+    height: 100px;
+    border: 4px solid transparent;
+    border-radius: 4px;
+    background-color: #fff;
+    margin: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+    font-size: 2.0em;
+    animation: rainbowBorder 2s linear infinite;
+}
+
+.card.selected {
+    background-color: #cce5ff;
+}
+
+.card-slot-container {
+    display: flex;
+    border: 4px solid transparent;
+    border-radius: 4px;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.card-slot {
+    width: 75px;
+    height: 100px;
+    border: 4px solid transparent;
+    border-radius: 4px;
+    background-color: #fff;
+    margin: 5px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    font-size: 1.5em;
+}
+
+.hidden {
+    display: none;
+}
+
+
+
+.status-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 1.5em; /* Increase font size by 1.5x */
+}
+
+.status-table th, .status-table td {
+    border: 1px solid #ccc;
+    height: 50px; /* Force a minimum row height */
+    text-align: center;
+    vertical-align: middle; /* Ensure content is vertically centered */
+}
+
+.status-table th {
+    padding: 15px 10px; /* Add padding to increase row height */
+}
+
+.status-table td {
+    padding: 15px 10px; /* Add padding to increase row height */
+}
+
+
+.status-bar {
+    height: 20px;
+    text-align: center; /* Align content to the center */
+
+}
+
+/* Apply gradient animations */
+.queue-table td.FOLDED {
+    animation: gradientFolded 3s infinite alternate;
+    color: white;
+}
+
+.queue-table td.CONFIRMED {
+    animation: gradientConfirmed 3s infinite alternate;
+    color: white;
+}
+
+.queue-table td.waiting-for-action {
+    animation: gradientWaiting 3s infinite alternate;
+    color: black;
+}
+
+.queue-table td.not-ur-turn {
+    animation: gradientNotYourTurn 3s infinite alternate;
+    color: white;
+}
+
+.player-container {
+    margin-bottom: 20px;
+}
+
+.player-top-row, .player-bottom-row {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.hr {
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+.queue-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.queue-table th, .queue-table td {
+    border: 1px solid #ccc;
+    text-align: center;
+    line-height: 1.2; /* Adjust line height if needed */
+    font-weight: bold; /* Make the text bold */
+    font-size: 100%; /* Increase font size by 30% */
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    width: 80%;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.219);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.player-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.top-row, .bottom-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.card {
+    text-align: center;
+}
+
+h3 {
+    margin-bottom: 10px;
+}
+
+#scoresTableContainer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#scoresTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#scoresTable th, #scoresTable td {
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+#scoresTable th {
+    background-color: #f2f2f2;
+    color: black;
+}
+
+#scoresTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#scoresTable tr:hover {
+    background-color: #ddd;
+}
+
+#scoresTable th, #scoresTable td {
+    text-align: center;
+}
+
+#currentTurn {
+    font-size: 2.5em;
+    text-align: center;
+    color: #835959;
+}
+/* Modal Container Styling */
+#roundEndModal .modal-content {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 500px;
+    margin: auto;
+    text-align: center;
+}
+
+/* Center-align the close button */
+#closeModal {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #f44336; /* Optional: Red background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#closeModal:hover {
+    background-color: #d32f2f; /* Optional: Darker red on hover */
+}
