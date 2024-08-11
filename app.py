@@ -975,5 +975,5 @@ def handle_update_score(data):
         socketio.emit('updated_scores', rooms[room]['scores'], room=room)
 
 # if __name__ == '__main__':
-#     socketio.run(app, debug=True, use_reloader=False)
+    # socketio.run(app, debug=True, use_reloader=False)
 
