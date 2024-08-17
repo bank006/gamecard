@@ -28,7 +28,15 @@ header {
     margin-top: 20px;
 }
 
-input[type="text"] {
+input[type="text" ]{
+    width: calc(50% - 22px);
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input[type="password" ]{
     width: calc(50% - 22px);
     margin: 10px;
     padding: 10px;
@@ -331,4 +339,25 @@ h3 {
 
 #closeModal:hover {
     background-color: #d32f2f; /* Optional: Darker red on hover */
+}
+
+
+
+/* login page */
+
+.container_login {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 24px;
+    padding: 20px;
 }

@@ -24,16 +24,21 @@ def generate_deck():
 
 deck = generate_deck()
 
-@app.route('/')
+@app.route('/index')
 def index():
     return render_template('index.html')
+
+@app.route('/')
+def Login():
+    return render_template('Login.html')
 
 @socketio.on('join')
 def handle_join(data):
     username = data['username']
     room = data['room']
+    print(f"User {username} is joining room {room}")
     join_room(room)
-
+    
     if room not in rooms:
         rooms[room] = {
             'players': [],
@@ -53,7 +58,7 @@ def handle_join(data):
                 'score_thisturn': []
             }
         }
-
+    
     if rooms[room]['game_started']:
         rooms[room]['waiting'].append(username)
         emit('waiting_area', {'waiting': rooms[room]['waiting']}, room=room)
@@ -64,12 +69,11 @@ def handle_join(data):
         rooms[room]['scores']['score_thisturn'].append(0)
         emit('user_joined', {'username': username}, room=room)
         emit('update_players', {'players': rooms[room]['players'], 'room': room}, room=room)
-        
-        # Send the current scores to the new player
         emit('updated_scores', rooms[room]['scores'], room=request.sid)
     else:
         rooms[room]['waiting'].append(username)
         emit('waiting_area', {'waiting': rooms[room]['waiting']}, room=room)
+
 
 @socketio.on('start_game')
 def handle_start_game(data):

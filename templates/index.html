@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/styles.css">
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <script src="/static/script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
     <header>
@@ -18,9 +19,21 @@
             <input type="text" id="roomCode" placeholder="Enter room code">
             <button id="createRoomBtn" onclick="createRoom()">Create Room</button>
             <button id="joinRoomBtn" onclick="joinRoom()">Join Room</button>
+            <div id="room-list">
+                <p>My room</p>
+                <!-- <div style="border: 1px solid black; width: 98%; padding: 10px;">
+                    <div style="display: flex; width: 97%; background-color: white; padding: 10px;">
+                        <p style="width: 33%; text-align: center;">Room 1</p>
+                        <p style="width: 33%; text-align: center;">PIN CODE</p>
+                        <div style="width: 33%; display: flex; justify-content: center;">
+                            <button >Join room</button>
+                        </div>      
+                    </div>
+                </div> -->
+            </div>
         </div>
-        
-        <div id="game" style="display: none;">
+                
+        <div id="game"  style="display: none;">
             <div id="roomDisplay"></div>
             <div id="dealer"></div>
             <div id="currentTurn"></div>
@@ -40,6 +53,9 @@
                 </table>
             </div>
             <div id="queueList"></div>
+
+
+           
 
            
            
@@ -75,6 +91,8 @@
         </div>
     </div>
 
+   
+
     <!-- Modal -->
     <div id="roundEndModal" class="modal">
         <div class="modal-content">
@@ -87,3 +105,64 @@
 
 </body>
 </html>
+
+<script>
+    window.onload = function () {
+    const username = "bank123";
+
+    // Get user data by username
+    axios.post('http://localhost:3003/get_user/name', { username })
+        .then(response => {
+            const users = response.data;
+            console.log(users);
+
+            // Assuming users[0] exists, set the uuid in the input field
+            document.getElementById('username').value = users[0].username;
+
+            const userId = users[0].uuid;
+
+            // Get room data by userId
+            return axios.post('http://localhost:3003/get_rooms/id', { userId });
+        })
+        .then(response => {
+            const rooms = response.data;
+            const roomListContainer = document.getElementById('room-list');
+
+            roomListContainer.innerHTML = '';
+            rooms.forEach(room => {
+
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'room-container';
+
+                roomDiv.innerHTML = `
+                
+                    <div class="room-header" style="border: 1px solid black; width: 98%; padding: 10px;">
+                        <div style="display: flex; width: 97%; background-color: white; padding: 10px;">
+                            <p style="width: 33%; text-align: center;">Room code</p>
+                            <input type="text" style="text-align: center;" id="roomCode2" value="${room.pincode}">
+                            <div class="room-actions" style="width: 33%; display: flex; justify-content: center;">
+                                <button onclick="joinRoom('${room.pincode}')">Join room</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                roomListContainer.appendChild(roomDiv);
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+        
+};
+
+        function test (){
+            const tests = document.getElementById('roomCode2').value
+            console.log(tests);
+        }
+    // window.onload = function(){
+    //     axios.post('http://localhost:3003/get_rooms/id')
+    // }
+
+</script>

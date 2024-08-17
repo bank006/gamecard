@@ -1,12 +1,19 @@
+
 document.addEventListener('DOMContentLoaded', function () {
-    const socket = io('http://localhost:8080' ,{
+    const socket = io('http://localhost:8080', {
         reconnectionAttempts: Infinity,  // Keep trying to reconnect indefinitely
         reconnectionDelay: 1000,         // Initial delay between reconnection attempts (1 second)
         reconnectionDelayMax: 2000,      // Maximum delay between reconnection attempts (5 seconds)
         timeout: 180000,                 // Set connection timeout to 180,000 milliseconds (3 minutes)
         randomizationFactor: 0.5         // Randomization factor for reconnection delays
     });
-    
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/axios@latest/dist/axios.min.js';
+    document.head.appendChild(script);
+    script.onload = function () {
+    console.log("Axios loaded");
+
 
     let selectedCards = [];
     const maxCards = 5;
@@ -16,11 +23,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let playerJoinOrder = 0; // Counter to track the order of players joining
     let isFirstPlayer = false; // Boolean to track if the player is the first to join
 
-     // Hide the buttons initially
+    // Hide the buttons initially
     const nextTurnButton = document.getElementById('nextTurn');
     const showResultButton = document.getElementById('showResult');
-     nextTurnButton.style.display = 'none';
-     showResultButton.style.display = 'none';
+    nextTurnButton.style.display = 'none';
+    showResultButton.style.display = 'none';
 
 
     const modal = document.getElementById("roundEndModal");
@@ -47,35 +54,66 @@ document.addEventListener('DOMContentLoaded', function () {
         return `<span style="color: ${color};">${value} ${cardSymbols[suit]}</span>`;
     }
 
-    window.createRoom = function () {
-        const username = document.getElementById('username').value;
-        if (username) {
-            const room = generateRoomCode();
-            document.getElementById('roomCode').value = room;
-            document.getElementById('roomDisplay').textContent = `Room Code: ${room}`;
-            socket.emit('join', { username, room });
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            document.getElementById('gameStart').style.display = 'block'; // Show the game start button
-        } else {
-            alert("Please enter your name.");
-        }
-    };
+    
+        window.createRoom = async function () {
+            const username = document.getElementById('username').value;
+            if (username) {
+                const room = generateRoomCode();
+                try {
+                    const result = await axios.post('http://localhost:3003/get_user/name', { username })
+                    const data = result.data
+                    const userId = data[0].uuid
+                    const uuiduser = userId
 
-    window.joinRoom = function () {
+                    pincode = room;
+                    const creat_room = await axios.post('http://localhost:3003/create_rooms', { pincode, uuiduser })
+                    console.log(creat_room)
+
+                    const get_room = await axios.post('http://localhost:3003/get_rooms/id', { userId })
+                    console.log(get_room)
+
+                } catch (error) {
+                    console.error(error)
+
+                }
+
+                document.getElementById('roomCode').value = room;
+                document.getElementById('roomDisplay').textContent = `Room Code: ${room}`;
+                socket.emit('join', { username, room });
+                document.getElementById('lobby').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+                document.getElementById('gameStart').style.display = 'block'; // Show the game start button
+            } else {
+                alert("Please enter your name.");
+            }
+        };
+    
+
+    let selectedRoom = null;
+    window.joinRoom = function (room2 = null) {
         const username = document.getElementById('username').value;
         const room = document.getElementById('roomCode').value;
+        // const room2 = document.getElementById('roomCode2').value;
         if (username && room) {
             socket.emit('join', { username, room });
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('game').style.display = 'block';
+        } else if (username && room2) {
+            const room = room2
+            selectedRoom = room2;
+            socket.emit('join', { username, room });
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+
         } else {
             alert("Please enter both your name and a room code.");
         }
     };
 
     window.startGame = function () {
-        const room = document.getElementById('roomCode').value;
+        console.log(selectedRoom)
+        const room = document.getElementById('roomCode').value || selectedRoom;
+        console.log(room)
         socket.emit('start_game', { room });
         document.getElementById('gameStart').style.display = 'none'; // Hide the game start button
     };
@@ -98,11 +136,11 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('It must be your turn to fold.');
         }
     };
-    window.showResult = function(){
+    window.showResult = function () {
         socket.emit('calculate_score', { room: document.getElementById('roomCode').value });
         document.getElementById('nextTurn').disabled = false; // Enable Next turn buttion
         document.getElementById('nextTurn').classList.remove('disabled');
-        
+
 
     }
 
@@ -110,23 +148,23 @@ document.addEventListener('DOMContentLoaded', function () {
         // Strip suffixes before sending to the server
         return selectedCards.map(card => card.replace(/-\d+$/, ''));
     }
-    
+
     // When confirming selection
     window.confirmSelection = function () {
         if (selectedCards.length === 5 && document.getElementById('username').value === currentTurn) {
             const username = document.getElementById('username').value;
             const room = document.getElementById('roomCode').value;
-    
+
             const cardsToSend = prepareCardsForServer(selectedCards);
-    
+
             socket.emit('confirm_selection', { username, room, selectedCards: cardsToSend });
             disableActionButtons();
         } else {
             alert('You must select exactly 5 cards and it must be your turn.');
         }
     };
-    
-    
+
+
     window.clearSelection = function () {
         selectedCards = [];
         const selectedElements = document.querySelectorAll('.selected');
@@ -138,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     window.nextTurn = function () {
-        
+
         if (!document.getElementById('nextTurn').disabled) {
             const room = document.getElementById('roomCode').value;
             socket.emit('next_turn', { room });
@@ -147,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
             clearSelection(); // Automatically clear selection for the new turn
         }
     };
-    window.controls = function() {
+    window.controls = function () {
         showCreatorButtons(); // Show the buttons for the first player
         document.getElementById('controls-admin').style.display = 'none';
         document.getElementById('nextTurn').disabled = true;
@@ -155,63 +193,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
     };
 
-    window.closeModal = function() {
+    window.closeModal = function () {
         modal.style.display = "none";
     }
 
-    closeSpan.onclick = function() {
+    closeSpan.onclick = function () {
         modal.style.display = "none";
     }
 
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         if (event.target == modal) {
             modal.style.display = "none";
         }
     }
 
     socket.on('user_joined', data => {
-    updatePlayerList(data.username);
-    const confirmationBox = document.getElementById('confirmationBox');
-    const messageElement = document.createElement('p');
-    messageElement.textContent = `Player ${data.username} has joined the room.`;
-    confirmationBox.appendChild(messageElement);
-    console.log(messageElement)
+        updatePlayerList(data.username);
+        const confirmationBox = document.getElementById('confirmationBox');
+        const messageElement = document.createElement('p');
+        messageElement.textContent = `Player ${data.username} has joined the room.`;
+        confirmationBox.appendChild(messageElement);
+        console.log(messageElement)
 
-             
-       
 
-    // Add player to scores table if not already present
-    const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
-    if (!document.getElementById(`score-${data.username}`)) {
-        const row = document.createElement('tr');
-        row.id = `score-${data.username}`;
-        row.innerHTML = `<td>${data.username}</td>
+
+
+        // Add player to scores table if not already present
+        const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
+        if (!document.getElementById(`score-${data.username}`)) {
+            const row = document.createElement('tr');
+            row.id = `score-${data.username}`;
+            row.innerHTML = `<td>${data.username}</td>
                          <td id="score-${data.username}-total">0</td>
                          <td><button onclick="editScore('${data.username}')">Edit</button></td>`;
-        scoresTable.appendChild(row);
+            scoresTable.appendChild(row);
+        }
+    });
+
+    function hideCreatorButtons() {
+        nextTurnButton.style.display = 'none';
+        showResultButton.style.display = 'none';
     }
-});
 
-function hideCreatorButtons() {
-    nextTurnButton.style.display = 'none';
-    showResultButton.style.display = 'none';
-}
-
-function showCreatorButtons() {
-    nextTurnButton.style.display = 'inline-block';
-    showResultButton.style.display = 'inline-block';
-}
+    function showCreatorButtons() {
+        nextTurnButton.style.display = 'inline-block';
+        showResultButton.style.display = 'inline-block';
+    }
 
 
 
     socket.on('update_players', data => {
         const playerList = document.getElementById('players');
         playerList.innerHTML = ''; // Clear existing players
-        
+
         data.players.forEach(player => {
             updatePlayerList(player);
         });
-        
+
         document.getElementById('roomDisplay').textContent = `Room Code: ${data.room}`;
     });
 
@@ -223,7 +261,8 @@ function showCreatorButtons() {
                 setTimeout(() => {
                     const suffixedCard = `${card}-${index}`; // Add suffix here
                     console.log(`Dealing card with suffix: ${suffixedCard}`); // Debugging line
-                    console.log(index)
+
+
                     const cardElement = document.createElement('div');
                     cardElement.classList.add('card');
                     cardElement.style.textAlign = 'center'; // Center-align text
@@ -236,11 +275,11 @@ function showCreatorButtons() {
             resetPlaceholders(); // Ensure placeholders are reset when dealing new cards
         }
     });
-    
-    
+
+
 
     socket.on('game_started', data => {
-        console.log("Show creator button:"+data.player)
+        console.log("Show creator button:" + data.player)
         document.getElementById('dealer').textContent = `Dealer: ${data.dealer}`;
         setCurrentTurn(data.current_turn);
         updatePlayerStatus(data.current_turn, 'YOUR TURN'); // Set the first player's turn to YOUR TURN
@@ -306,25 +345,25 @@ function showCreatorButtons() {
             disableFoldButton();
         }
 
-        
+
     });
 
     socket.on('reveal_cards', data => {
         const players = Object.keys(data.hands);
-    
+
         function revealPlayerCards(index = 0) {
             if (index >= players.length) return;
-    
+
             const player = players[index];
             const playerElement = document.getElementById(player);
             const topRowElement = playerElement.querySelector('.player-top-row');
             const bottomRowElement = playerElement.querySelector('.player-bottom-row');
-    
+
             topRowElement.innerHTML = ''; // Clear previous cards
             bottomRowElement.innerHTML = '';
-    
+
             let cardIndex = 0;
-    
+
             function revealTopCards() {
                 if (cardIndex < 2) {
                     const card = data.hands[player][cardIndex];
@@ -339,7 +378,7 @@ function showCreatorButtons() {
                     revealBottomCards();
                 }
             }
-    
+
             function revealBottomCards() {
                 if (cardIndex < 5) {
                     const card = data.hands[player][cardIndex];
@@ -354,36 +393,36 @@ function showCreatorButtons() {
                     setTimeout(() => revealPlayerCards(index + 1), 500); // Move to the next player after a short delay
                 }
             }
-    
+
             revealTopCards();
         }
-    
+
         revealPlayerCards(); // Start the revealing process
     });
-    
+
 
     socket.on('enable_next_turn', data => {
         console.log('enable_next_turn event triggered');
         console.log('Received data:', data);
-        
+
         // Enable the "Show Result" button
-        document.getElementById('showResult').disabled = false; 
+        document.getElementById('showResult').disabled = false;
         showResultButton.classList.remove('disabled');
-        
+
         // Update the current turn message
         document.getElementById('currentTurn').textContent = 'TURN IS OVER - PRESS SHOW RESULT';
-        
+
         // Stop the timer
         clearInterval(timerInterval);
-        
+
         // Show the modal with a simple message
         const modal = document.getElementById('roundEndModal');
         const playersContainer = document.getElementById('playersContainer');
         playersContainer.innerHTML = ''; // Clear existing content
-        
+
         console.log('Displaying modal');
         modal.style.display = "block"; // Display the modal immediately
-        
+
         // Create and display the message
         const messageDiv = document.createElement('div');
         messageDiv.textContent = "All players have taken their turn, ADMIN please show result.";
@@ -392,8 +431,8 @@ function showCreatorButtons() {
         messageDiv.style.marginTop = '20px';
         playersContainer.appendChild(messageDiv);
     });
-    
-    
+
+
     // Listen for the updated_scores event
     socket.on('disconnect', () => {
         console.log('Disconnected from server. Attempting to reconnect...');
@@ -408,43 +447,71 @@ function showCreatorButtons() {
     });
 
 
-    socket.on('updated_scores', scores => {
+ 
+    
+    socket.on('updated_scores', async scores => {
+        console.log(selectedRoom)
         console.log('Received updated scores:', scores); // Debugging line
+        const username = document.getElementById('username').value;
         if (scores) {
-            const username = document.getElementById('username').value;
+            try{
+                const result = await axios.post('http://localhost:3003/get_user/name', { username })
+                const data = result.data
+                const userId = data[0].uuid
+
+                const get_room = await axios.post('http://localhost:3003/get_rooms/id', { userId })
+                const data_pin = get_room.data
+                const pincode = selectedRoom
+                console.log(pincode)
+
+                const get_room_pin = await axios.post('http://localhost:3003/get_room/pincode', {pincode})
+                console.log(get_room_pin.data)
+                const existingScores = get_room_pin.data
+                console.log(existingScores)
+
+                scores.players.forEach((player, index) => {
+
+                    const playerData = existingScores.find(entry => entry.uuiduser === userId);
+                    const previousScore = playerData ? parseInt(playerData.score, 10) : 0;
+
+                    console.log(scores.score_total[index])
+
+                    const totalScore = scores.score_total[index] + previousScore || 0;
+                    const roundScore = scores.score_thisturn[index]; // Assuming score_thisturn is the current round score
+                    console.log(`Updating score for player ${player}: ${totalScore}`); // Debugging line
     
-            scores.players.forEach((player, index) => {
-                const totalScore = scores.score_total[index];
-                const roundScore = scores.score_thisturn[index]; // Assuming score_thisturn is the current round score
-                console.log(`Updating score for player ${player}: ${totalScore}`); // Debugging line
+                    const scoreElement = document.getElementById(`score-${player}-total`);
     
-                const scoreElement = document.getElementById(`score-${player}-total`);
+                    if (scoreElement) {
+                        scoreElement.textContent = totalScore;
+                        console.log(`Updated DOM element with ID score-${player}-total to ${totalScore}`); // Debugging line
+                    } else {
+                        console.log(`No DOM element found for player ${player}, adding new row.`); // Debugging line
+                        const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
+                        const row = document.createElement('tr');
+                        row.id = `score-${player}`;
+                        row.innerHTML = `<td>${player}</td>
+                                         <td id="score-${player}-total">${totalScore}</td>
+                                         <td><button onclick="editScore('${player}')">Edit</button></td>`;
+                        scoresTable.appendChild(row);
+                    }
     
-                if (scoreElement) {
-                    scoreElement.textContent = totalScore;
-                    console.log(`Updated DOM element with ID score-${player}-total to ${totalScore}`); // Debugging line
-                } else {
-                    console.log(`No DOM element found for player ${player}, adding new row.`); // Debugging line
-                    const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
-                    const row = document.createElement('tr');
-                    row.id = `score-${player}`;
-                    row.innerHTML = `<td>${player}</td>
-                                     <td id="score-${player}-total">${totalScore}</td>
-                                     <td><button onclick="editScore('${player}')">Edit</button></td>`;
-                    scoresTable.appendChild(row);
-                }
-    
-                // Display the round score above "Your Hand" for the current player
-                if (player === username) {
-                    const roundScoreDisplay = document.getElementById('roundScoreDisplay');
-                    roundScoreDisplay.innerHTML = `<strong>Your Round Score: ${roundScore}</strong>`;
-                }
-            });
+                    // Display the round score above "Your Hand" for the current player
+                    if (player === username) {
+                        const roundScoreDisplay = document.getElementById('roundScoreDisplay');
+                        roundScoreDisplay.innerHTML = `<strong>Your Round Score: ${roundScore}</strong>`;
+                    }
+                });
+
+            }catch(error){
+                console.error(error);
+            }
+
         }
     });
-    
-    
-    
+
+
+
 
     window.editScore = function (player) {
         const scoreCell = document.getElementById(`score-${player}-total`);
@@ -458,7 +525,7 @@ function showCreatorButtons() {
         console.log(`Saving score for ${player}: ${newScore}`); // Debugging line
         socket.emit('update_score', { player, newScore });
     };
-    
+
 
 
     socket.on('user_left', data => {
@@ -472,15 +539,18 @@ function showCreatorButtons() {
         confirmationBox.appendChild(messageElement);
     });
 
-    socket.on('waiting_area', data => {
-        const waitingList = document.getElementById('waitingList');
-        waitingList.innerHTML = ''; // Clear existing waiting list
-        data.waiting.forEach(player => {
-            const playerElement = document.createElement('div');
-            playerElement.textContent = player;
-            waitingList.appendChild(playerElement);
+    // script.onload = function () {
+        socket.on('waiting_area', data => {
+            const waitingList = document.getElementById('waitingList');
+            waitingList.innerHTML = ''; // Clear existing waiting list
+            data.waiting.forEach(player => {
+                const playerElement = document.createElement('div');
+                playerElement.textContent = player;
+                waitingList.appendChild(playerElement);
+            });
         });
-    });
+    // }
+
 
     socket.on('next_turn_started', data => {
         setCurrentTurn(data.current_turn);
@@ -495,11 +565,11 @@ function showCreatorButtons() {
     socket.on('update_queue', data => {
         const queueList = document.getElementById('queueList');
         queueList.innerHTML = ''; // Clear existing queue
-    
+
         // Create the table structure
         const table = document.createElement('table');
         table.classList.add('queue-table');
-    
+
         // Create table header
         const headerRow = document.createElement('tr');
         const headerPlayer = document.createElement('th');
@@ -509,17 +579,17 @@ function showCreatorButtons() {
         headerRow.appendChild(headerPlayer);
         headerRow.appendChild(headerStatus);
         table.appendChild(headerRow);
-    
+
         // Create table rows for each player
         data.queue.forEach(player => {
             const row = document.createElement('tr');
             const playerCell = document.createElement('td');
             playerCell.textContent = player;
-    
+
             const statusCell = document.createElement('td');
             const status = data.player_statuses[player];
             statusCell.textContent = status;
-    
+
             // Apply background color based on status
             if (status === 'FOLDED') {
                 statusCell.style.backgroundColor = 'red';
@@ -534,17 +604,17 @@ function showCreatorButtons() {
                 statusCell.style.backgroundColor = 'yellow';
                 statusCell.style.color = 'black'; // Black text for better contrast on yellow
             }
-    
+
             row.appendChild(playerCell);
             row.appendChild(statusCell);
             table.appendChild(row);
         });
-    
+
         // Append the table to the queueList container
         queueList.appendChild(table);
     });
-    
-    
+
+
 
     function updatePlayerList(player, numCards = 5) {
         let playerElement = document.getElementById(player);
@@ -598,12 +668,12 @@ function showCreatorButtons() {
 
     function selectCard(cardElement, card) {
         console.log(`Card clicked: ${card}`); // Log the clicked card
-    
+
         // Check if the card is already selected using the full string (including suffix)
         const cardIndex = selectedCards.indexOf(card);
-    
+
         console.log(`Card index in selectedCards: ${cardIndex}`);
-    
+
         if (cardIndex !== -1) {
             // If the card is already selected, remove it from the selectedCards array
             selectedCards.splice(cardIndex, 1);
@@ -617,48 +687,48 @@ function showCreatorButtons() {
                 alert('You can only select up to 5 cards.');
             }
         }
-    
+
         console.log(`Current selected cards:`, selectedCards); // Log current state of selectedCards
-    
+
         updateCardSlots();
     }
-    
-    
-    
-    
-    
+
+
+
+
+
     function formatCard(card) {
         // Remove any suffix like -0, -1, etc.
         const cleanCard = card.replace(/-\d+$/, '');
-    
+
         if (cleanCard === 'Joker') return `<span style="color: blue;">${cardSymbols['Joker']}</span>`;
-    
+
         let [value, suit] = cleanCard.split(' of ');
         value = value.replace('King', 'K').replace('Queen', 'Q').replace('Jack', 'J');
         const color = (suit === 'Hearts' || suit === 'Diamonds') ? 'red' : 'black';
         return `<span style="color: ${color};">${value} ${cardSymbols[suit]}</span>`;
     }
-    
-    
+
+
     function updateCardSlots() {
         const topRow = document.getElementById('top-row');
         const bottomRow = document.getElementById('bottom-row');
         topRow.innerHTML = '';
         bottomRow.innerHTML = '';
-    
+
         selectedCards.forEach((card, index) => {
             const cardSlot = document.createElement('div');
             cardSlot.classList.add('card-slot');
             cardSlot.style.textAlign = 'center'; // Center-align text
             cardSlot.innerHTML = formatCard(card); // Display card with emoji
-    
+
             if (index < 2) {
                 topRow.appendChild(cardSlot);
             } else {
                 bottomRow.appendChild(cardSlot);
             }
         });
-    
+
         // Ensure placeholders are always visible
         while (topRow.children.length < 2) {
             const placeholder = document.createElement('div');
@@ -675,8 +745,8 @@ function showCreatorButtons() {
             bottomRow.appendChild(placeholder);
         }
     }
-    
-    
+
+
 
     function startTimer(duration, player) {
         if (timerInterval) {
@@ -812,67 +882,68 @@ function showCreatorButtons() {
         }
     }
 
-function startTimer(duration, player) {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-    }
-    let timer = duration, minutes, seconds;
-    const display = document.getElementById('timer');
-    timerInterval = setInterval(function () {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-
-        display.textContent = `${minutes}:${seconds}`;
-
-        if (--timer < 0) {
+    function startTimer(duration, player) {
+        if (timerInterval) {
             clearInterval(timerInterval);
-            socket.emit('fold', { username: player, room: document.getElementById('roomCode').value });
-
-            if (player === document.getElementById('username').value) {
-                // Automatically leave the game if the current player's timer runs out
-                leaveGame();
-            }
         }
-    }, 1000);
-}
-   
-function startTimer(duration, player) {
-    if (timerInterval) {
-        clearInterval(timerInterval);
+        let timer = duration, minutes, seconds;
+        const display = document.getElementById('timer');
+        timerInterval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            display.textContent = `${minutes}:${seconds}`;
+
+            if (--timer < 0) {
+                clearInterval(timerInterval);
+                socket.emit('fold', { username: player, room: document.getElementById('roomCode').value });
+
+                if (player === document.getElementById('username').value) {
+                    // Automatically leave the game if the current player's timer runs out
+                    leaveGame();
+                }
+            }
+        }, 1000);
     }
-    let timer = duration, minutes, seconds;
-    const display = document.getElementById('timer');
-    timerInterval = setInterval(function () {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
 
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-
-        display.textContent = `${minutes}:${seconds}`;
-
-        if (--timer < 0) {
+    function startTimer(duration, player) {
+        if (timerInterval) {
             clearInterval(timerInterval);
-            socket.emit('fold', { username: player, room: document.getElementById('roomCode').value });
-
-            if (player === document.getElementById('username').value) {
-                // Automatically leave the game if the current player's timer runs out
-                leaveGame();
-            }
         }
-    }, 1000);
-}
+        let timer = duration, minutes, seconds;
+        const display = document.getElementById('timer');
+        timerInterval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            display.textContent = `${minutes}:${seconds}`;
+
+            if (--timer < 0) {
+                clearInterval(timerInterval);
+                socket.emit('fold', { username: player, room: document.getElementById('roomCode').value });
+
+                if (player === document.getElementById('username').value) {
+                    // Automatically leave the game if the current player's timer runs out
+                    leaveGame();
+                }
+            }
+        }, 1000);
+    }
     function showModal() {
         modal.style.display = "block";
     }
     socket.on('disconnect', () => {
-    console.log('Disconnected from server. Attempting to reconnect...');
-    // Attempt to reconnect after a short delay
-    setTimeout(() => {
-        socket.connect();
-    }, 1000);
-});
+        console.log('Disconnected from server. Attempting to reconnect...');
+        // Attempt to reconnect after a short delay
+        setTimeout(() => {
+            socket.connect();
+        }, 1000);
+    });
+}
 });

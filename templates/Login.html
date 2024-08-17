@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container_login">
+        <div class="box">
+            <div class="content">
+                <div style="text-align: center;">
+                    <h1>Login</h1>
+                </div>
+                
+                <div>
+                    <input style="width: 88%;" class="loginname"  id="login-username" type="text" placeholder="username">
+                    <input style="width: 88%;" class="loginpassword" type="password" placeholder="password"  id="login-password">
+                </div>
+                <div style="display: flex ; justify-content: center;">
+                    <button id="btn-login" onclick="loginButton">Login</button>
+                </div>
+            </div> 
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    const loginButton = document.getElementById('btn-login')
+    
+    loginButton.addEventListener('click', function() {
+        const login_username = document.getElementById('login-username').value;
+        const login_password = document.getElementById('login-password').value
+        Login();
+    });
+
+
+    function Login() {
+        const login_username = document.getElementById('login-username').value;
+        const login_password = document.getElementById('login-password').value
+        const data = {
+            data: {
+                username: login_username,
+                password: login_password
+            }
+        };
+            axios.post('http://localhost:3003/post_user' , data)
+                .then(response => {
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+</script>
