@@ -20,7 +20,7 @@
                     <input style="width: 88%;" class="loginpassword" type="password" placeholder="password"  id="login-password">
                 </div>
                 <div style="display: flex ; justify-content: center;">
-                    <button id="btn-login" onclick="loginButton">Login</button>
+                    <button id="btn-login" onclick="loginButton">Signin</button>
                 </div>
             </div> 
         </div>
@@ -49,6 +49,7 @@
             axios.post('https://backgamecard.vercel.app/post_user' , data)
                 .then(response => {
                     console.log(response.data);
+                    window.location.href = '/';
                 })
                 .catch(error => {
                     console.error(error);
