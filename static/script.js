@@ -60,16 +60,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (username) {
                 const room = generateRoomCode();
                 try {
-                    const result = await axios.post('http://localhost:3003/get_user/name', { username })
+                    const result = await axios.post('https://backgamecard.vercel.app/get_user/name', { username })
                     const data = result.data
                     const userId = data[0].uuid
                     const uuiduser = userId
 
                     pincode = room;
-                    const creat_room = await axios.post('http://localhost:3003/create_rooms', { pincode, uuiduser })
+                    const creat_room = await axios.post('https://backgamecard.vercel.app/create_rooms', { pincode, uuiduser })
                     console.log(creat_room)
 
-                    const get_room = await axios.post('http://localhost:3003/get_rooms/id', { userId })
+                    const get_room = await axios.post('https://backgamecard.vercel.app/get_rooms/id', { userId })
                     console.log(get_room)
 
                 } catch (error) {
@@ -455,22 +455,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const username = document.getElementById('username').value;
         if (scores) {
             try{
-                const result = await axios.post('http://localhost:3003/get_user/name', { username })
+                const result = await axios.post('https://backgamecard.vercel.app/get_user/name', { username })
                 const data = result.data
                 const userId = data[0].uuid
 
-                const get_room = await axios.post('http://localhost:3003/get_rooms/id', { userId })
+                const get_room = await axios.post('https://backgamecard.vercel.app/get_rooms/id', { userId })
                 const data_pin = get_room.data
                 const pincode = selectedRoom
-                const get_room_pin = await axios.post('http://localhost:3003/get_room/pincode', {pincode})
+                const get_room_pin = await axios.post('https://backgamecard.vercel.app/get_room/pincode', {pincode})
                 console.log(get_room_pin.data)
-                const existingScores = get_room_pin.data
-                console.log(existingScores)
-
-                // const score = scores.score_total[0]
-
-                // const post_score = await axios.post('http://localhost:3003/update_score', { pincode, userId,score })
-                // console.log(post_score.data)
 
                 scores.players.forEach(async(player, index) => {
                     const playerData = existingScores.find(entry => entry.uuiduser === userId);
@@ -486,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         let score = scoresq - oldpara
                         oldpara+=score
                          try{
-                            await axios.post('http://localhost:3003/update_scores', { pincode, userId, score });
+                            await axios.post('https://backgamecard.vercel.app/update_scores', { pincode, userId, score });
                             console.log('Score updated successfully');
 
                             const scoreElement = document.getElementById(`score-${player}-total`);

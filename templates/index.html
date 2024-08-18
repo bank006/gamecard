@@ -118,7 +118,7 @@
         console.log(username)
 
     // Get user data by username
-    axios.post('http://localhost:3003/get_user/name', { username })
+    axios.post('https://backgamecard.vercel.app/get_user/name', { username })
         .then(response => {
             const users = response.data;
             console.log(users);
@@ -129,7 +129,7 @@
             const userId = users[0].uuid;
 
             // Get room data by userId
-            return axios.post('http://localhost:3003/get_rooms/id', { userId });
+            return axios.post('https://backgamecard.vercel.app/get_rooms/id', { userId });
         })
         .then(response => {
             const rooms = response.data;

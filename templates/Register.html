@@ -46,7 +46,7 @@
                 password: login_password
             }
         };
-            axios.post('http://localhost:3003/post_user' , data)
+            axios.post('https://backgamecard.vercel.app/post_user' , data)
                 .then(response => {
                     console.log(response.data);
                 })
