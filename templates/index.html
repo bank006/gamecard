@@ -108,7 +108,14 @@
 
 <script>
     window.onload = function () {
-    const username = "bank123";
+
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const username = getQueryParam('username');
+        console.log(username)
 
     // Get user data by username
     axios.post('http://localhost:3003/get_user/name', { username })

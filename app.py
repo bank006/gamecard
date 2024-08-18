@@ -32,13 +32,19 @@ def index():
 def Login():
     return render_template('Login.html')
 
+@app.route('/sigin')
+def Signin():
+    return render_template('Register.html')
+
 @socketio.on('join')
 def handle_join(data):
     username = data['username']
     room = data['room']
-    print(f"User {username} is joining room {room}")
+    
+    # Join the room
     join_room(room)
     
+    # Initialize the room if it doesn't exist
     if room not in rooms:
         rooms[room] = {
             'players': [],
@@ -58,19 +64,41 @@ def handle_join(data):
                 'score_thisturn': []
             }
         }
+
+    # Check if the player is already in the room
+    if username in rooms[room]['players']:
+        print(f"Player {username} is already in the room {room}.")
+        # Send current state or updates to the rejoining player
+        emit('update_players', {'players': rooms[room]['players'], 'room': room}, room=request.sid)
+        emit('updated_scores', rooms[room]['scores'], room=request.sid)
+        return
     
+    if username in rooms[room]['waiting']:
+        print(f"Player {username} is already waiting in the room {room}.")
+        # Send current state or updates to the rejoining player
+        emit('waiting_area', {'waiting': rooms[room]['waiting']}, room=request.sid)
+        return
+
+    # Handle players based on game state
     if rooms[room]['game_started']:
+        # Game has started, add player to the waiting list
         rooms[room]['waiting'].append(username)
         emit('waiting_area', {'waiting': rooms[room]['waiting']}, room=room)
     elif len(rooms[room]['players']) < 10:
+        # Game has not started and room is not full
         rooms[room]['players'].append(username)
         rooms[room]['scores']['players'].append(username)
         rooms[room]['scores']['score_total'].append(0)
         rooms[room]['scores']['score_thisturn'].append(0)
+        
+        # Notify all players that a new user has joined
         emit('user_joined', {'username': username}, room=room)
         emit('update_players', {'players': rooms[room]['players'], 'room': room}, room=room)
+        
+        # Send the current scores to the new player
         emit('updated_scores', rooms[room]['scores'], room=request.sid)
     else:
+        # Room is full, add player to the waiting list
         rooms[room]['waiting'].append(username)
         emit('waiting_area', {'waiting': rooms[room]['waiting']}, room=room)
 
@@ -185,14 +213,26 @@ def update_scores(room):
 def handle_leave_game(data):
     username = data['username']
     room = data['room']
+    
     if room in rooms:
         if rooms[room]['current_turn'] == username:
             handle_fold({'username': username, 'room': room})
+        
         rooms[room]['leaving'].add(username)
+        
         leave_room(room)
+        
         socketio.emit('user_left', {'username': username}, room=room)
         socketio.emit('message', {'message': f'Player {username} has left the game.'}, room=room)
-        update_queue(room)
+
+        rooms[room]['players'].remove(username)
+        
+        if len(rooms[room]['players']) == 0:
+            del rooms[room]
+            print(f"Room {room} has been deleted due to no players remaining.")
+        else:
+            update_queue(room)
+
 
 @socketio.on('next_turn')
 def handle_next_turn(data):

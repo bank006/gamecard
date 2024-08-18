@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('game').style.display = 'block';
         } else if (username && room2) {
-            const room = room2
             selectedRoom = room2;
+            const room = room2   
             socket.emit('join', { username, room });
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('game').style.display = 'block';
@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     window.startGame = function () {
-        console.log(selectedRoom)
         const room = document.getElementById('roomCode').value || selectedRoom;
         console.log(room)
         socket.emit('start_game', { room });
@@ -137,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
     window.showResult = function () {
-        socket.emit('calculate_score', { room: document.getElementById('roomCode').value });
+        socket.emit('calculate_score', { room: document.getElementById('roomCode').value || selectedRoom });
         document.getElementById('nextTurn').disabled = false; // Enable Next turn buttion
         document.getElementById('nextTurn').classList.remove('disabled');
 
@@ -153,8 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.confirmSelection = function () {
         if (selectedCards.length === 5 && document.getElementById('username').value === currentTurn) {
             const username = document.getElementById('username').value;
-            const room = document.getElementById('roomCode').value;
-
+            const room = document.getElementById('roomCode').value || selectedRoom;
             const cardsToSend = prepareCardsForServer(selectedCards);
 
             socket.emit('confirm_selection', { username, room, selectedCards: cardsToSend });
@@ -178,7 +176,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.nextTurn = function () {
 
         if (!document.getElementById('nextTurn').disabled) {
-            const room = document.getElementById('roomCode').value;
+            const room = document.getElementById('roomCode').value || selectedRoom;
+            console.log(room)
             socket.emit('next_turn', { room });
             resetPlaceholders(); // Reset placeholders when the next turn is initiated
             resetCardSlots(); // Reset top and bottom row card slots
@@ -462,40 +461,52 @@ document.addEventListener('DOMContentLoaded', function () {
                 const get_room = await axios.post('http://localhost:3003/get_rooms/id', { userId })
                 const data_pin = get_room.data
                 const pincode = selectedRoom
-                console.log(pincode)
-
                 const get_room_pin = await axios.post('http://localhost:3003/get_room/pincode', {pincode})
                 console.log(get_room_pin.data)
                 const existingScores = get_room_pin.data
                 console.log(existingScores)
 
-                scores.players.forEach((player, index) => {
+                // const score = scores.score_total[0]
 
+                // const post_score = await axios.post('http://localhost:3003/update_score', { pincode, userId,score })
+                // console.log(post_score.data)
+
+                scores.players.forEach(async(player, index) => {
                     const playerData = existingScores.find(entry => entry.uuiduser === userId);
                     const previousScore = playerData ? parseInt(playerData.score, 10) : 0;
 
-                    console.log(scores.score_total[index])
 
                     const totalScore = scores.score_total[index] + previousScore || 0;
+                    let oldpara = 0
+                    let scoresq = scores.score_total[index] || 0
                     const roundScore = scores.score_thisturn[index]; // Assuming score_thisturn is the current round score
-                    console.log(`Updating score for player ${player}: ${totalScore}`); // Debugging line
-    
-                    const scoreElement = document.getElementById(`score-${player}-total`);
-    
-                    if (scoreElement) {
-                        scoreElement.textContent = totalScore;
-                        console.log(`Updated DOM element with ID score-${player}-total to ${totalScore}`); // Debugging line
-                    } else {
-                        console.log(`No DOM element found for player ${player}, adding new row.`); // Debugging line
-                        const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
-                        const row = document.createElement('tr');
-                        row.id = `score-${player}`;
-                        row.innerHTML = `<td>${player}</td>
-                                         <td id="score-${player}-total">${totalScore}</td>
-                                         <td><button onclick="editScore('${player}')">Edit</button></td>`;
-                        scoresTable.appendChild(row);
+
+                    if(scoresq >= oldpara){
+                        let score = scoresq - oldpara
+                        oldpara+=score
+                         try{
+                            await axios.post('http://localhost:3003/update_scores', { pincode, userId, score });
+                            console.log('Score updated successfully');
+
+                            const scoreElement = document.getElementById(`score-${player}-total`);
+                            if (scoreElement) {
+                                scoreElement.textContent = totalScore;
+                                console.log(`Updated DOM element with ID score-${player}-total to ${totalScore}`); // Debugging line
+                            } else {
+                                console.log(`No DOM element found for player ${player}, adding new row.`); // Debugging line
+                                const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
+                                const row = document.createElement('tr');
+                                row.id = `score-${player}`;
+                                row.innerHTML = `<td>${player}</td>
+                                                 <td id="score-${player}-total">${totalScore}</td>
+                                                 <td><button onclick="editScore('${player}')">Edit</button></td>`;
+                                scoresTable.appendChild(row);
+                            }
+                        }catch(error){
+                            console.error(error);
+                        }
                     }
-    
+                   
                     // Display the round score above "Your Hand" for the current player
                     if (player === username) {
                         const roundScoreDisplay = document.getElementById('roundScoreDisplay');
@@ -945,5 +956,7 @@ document.addEventListener('DOMContentLoaded', function () {
             socket.connect();
         }, 1000);
     });
+
+    
 }
 });
