@@ -258,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
             handElement.innerHTML = ''; // Clear previous hand
             data.cards.forEach((card, index) => {
                 setTimeout(() => {
+                    console.log(card)
                     const suffixedCard = `${card}-${index}`; // Add suffix here
                     console.log(`Dealing card with suffix: ${suffixedCard}`); // Debugging line
 

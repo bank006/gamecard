@@ -58,7 +58,7 @@
                     const status = response.data
                     if(status.message == "Login successful"){
                         const username = status.user.username
-                        window.location.href = `http://127.0.0.1:5500/templates/index.html?username=${encodeURIComponent(username)}`
+                        window.location.href = `/index?username=${encodeURIComponent(username)}`
                     }else{
                         alert("Your have a accoun ?")
                     }

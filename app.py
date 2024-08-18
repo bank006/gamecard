@@ -111,10 +111,13 @@ def handle_start_game(data):
         start_game(room)
 
 def start_game(room):
-    rooms[room]['dealer'] = rooms[room]['players'][0]
+    # Randomly select a dealer from the list of players
+    rooms[room]['dealer'] = random.choice(rooms[room]['players'])
     rooms[room]['current_turn'] = rooms[room]['dealer']
+    
     for player in rooms[room]['players']:
         deal_cards_to_player(player, room)
+        
     socketio.emit('game_started', {'dealer': rooms[room]['dealer'], 'current_turn': rooms[room]['current_turn']}, room=room)
     update_queue(room)
     start_turn_timer(room, rooms[room]['current_turn'])
