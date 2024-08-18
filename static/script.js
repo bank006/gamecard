@@ -102,12 +102,18 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log(uuiduser);
         
         if (username && room) {
-            selectedRoom = room;
-            socket.emit('join', { username, room });
-            const pincode = room
-            axios.post('https://backgamecard.vercel.app/create_rooms_two', { pincode, uuiduser })
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
+            try{
+                const pincode = room
+                axios.post('https://backgamecard.vercel.app/create_rooms_two', { pincode, uuiduser })
+                selectedRoom = room;
+                socket.emit('join', { username, room });
+                
+    
+                document.getElementById('lobby').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+            }catch(error){
+                console.error(error);
+            }
 
         } else if (username && room2) {
             selectedRoom = room2;
