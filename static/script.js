@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log("Axios loaded");
 
 
+
+
     let selectedCards = [];
     const maxCards = 5;
     let currentTurn = null;
@@ -88,16 +90,25 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
     
+        
+    
 
     let selectedRoom = null;
     window.joinRoom = function (room2 = null) {
         const username = document.getElementById('username').value;
         const room = document.getElementById('roomCode').value;
         // const room2 = document.getElementById('roomCode2').value;
+        const uuiduser = document.getElementById('userId').value; 
+        console.log(uuiduser);
+        
         if (username && room) {
+            selectedRoom = room;
             socket.emit('join', { username, room });
+            const pincode = room
+            axios.post('https://backgamecard.vercel.app/create_rooms_two', { pincode, uuiduser })
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('game').style.display = 'block';
+
         } else if (username && room2) {
             selectedRoom = room2;
             const room = room2   
@@ -476,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     let scoresq = scores.score_total[index] || 0
                     const roundScore = scores.score_thisturn[index]; // Assuming score_thisturn is the current round score
 
-                    if(scoresq >= oldpara){
+                    if(scoresq > oldpara){
                         let score = scoresq - oldpara
                         oldpara+=score
                          try{

@@ -17,6 +17,7 @@
         <div id="lobby">
             <input type="text" id="username" placeholder="Enter your name">
             <input type="text" id="roomCode" placeholder="Enter room code">
+            <input type="text" id="userId" >
             <button id="createRoomBtn" onclick="createRoom()">Create Room</button>
             <button id="joinRoomBtn" onclick="joinRoom()">Join Room</button>
             <div id="room-list">
@@ -117,16 +118,16 @@
         const username = getQueryParam('username');
         console.log(username)
 
+        document.getElementById('username').value = username ;
+
     // Get user data by username
     axios.post('https://backgamecard.vercel.app/get_user/name', { username })
         .then(response => {
             const users = response.data;
-            console.log(users);
-
-            // Assuming users[0] exists, set the uuid in the input field
-            document.getElementById('username').value = users[0].username;
-
+            
+            console.log(users[0].uuid);
             const userId = users[0].uuid;
+            document.getElementById('userId').value = userId  ;
 
             // Get room data by userId
             return axios.post('https://backgamecard.vercel.app/get_rooms/id', { userId });
