@@ -464,6 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const pincode = selectedRoom
                 const get_room_pin = await axios.post('https://backgamecard.vercel.app/get_room/pincode', {pincode})
                 console.log(get_room_pin.data)
+                const existingScores = get_room_pin.data
 
                 scores.players.forEach(async(player, index) => {
                     const playerData = existingScores.find(entry => entry.uuiduser === userId);
