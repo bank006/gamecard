@@ -34,12 +34,15 @@
             </div>
         </div>
                 
-        <div id="game"  style="display: none;">
+        <div id="game" style="display: none;" >
             <div id="roomDisplay"></div>
             <div id="dealer"></div>
             <div id="currentTurn"></div>
             <div id="scoresTableContainer">
                 <h3>Scores</h3>
+                <div style="display: flex; justify-content: end; ">
+                    <button  id="btn-leavewriting" onclick="leaveWaitingRoom()">Leave waiting room</button>
+                </div>
                 <table id="scoresTable">
                     <thead>
                         <tr>
@@ -56,10 +59,7 @@
             <div id="queueList"></div>
 
 
-           
-
-           
-           
+    
             <div id="deck" class="hidden">   
                 <h2>Your Hand</h2>
                 <div id="hand" class="card-container"></div>
@@ -119,6 +119,7 @@
         console.log(username)
 
         document.getElementById('username').value = username ;
+        document.getElementById('dealer').textContent = `Dealer: ${username}`
 
     // Get user data by username
     axios.post('https://backgamecard.vercel.app/get_user/name', { username })
@@ -172,5 +173,17 @@
     // window.onload = function(){
     //     axios.post('http://localhost:3003/get_rooms/id')
     // }
+
+    window.addEventListener('beforeunload', function (e) {
+    // แสดงข้อความเตือนก่อนที่หน้าเว็บจะถูกปิดหรือรีเฟรช
+    const confirmationMessage = 'Are you sure you want to leave? Changes you made may not be saved.';
+
+    // สำหรับเบราว์เซอร์บางตัว, ต้องตั้งค่า `returnValue` เพื่อแสดงกล่องข้อความ
+    e.returnValue = confirmationMessage;
+
+    // แสดงข้อความในกล่องข้อความของเบราว์เซอร์
+    return confirmationMessage;
+});
+
 
 </script>
