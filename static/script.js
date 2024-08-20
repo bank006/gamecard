@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Optionally, update the UI or redirect the user
                 document.getElementById('lobby').style.display = 'block';
+                document.getElementById('game').style.display = 'none';
             } else {
                 alert("Please enter your name and room code.");
             }
