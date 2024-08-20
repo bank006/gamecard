@@ -476,70 +476,105 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-        socket.on('updated_scores', async scores => {
-            console.log(selectedRoom)
+        // socket.on('updated_scores', async scores => {
+        //     console.log(selectedRoom)
+        //     console.log('Received updated scores:', scores); // Debugging line
+        //     const username = document.getElementById('username').value;
+        //     if (scores) {
+        //         try {
+        //             const result = await axios.post('https://backgamecard.vercel.app/get_user/name', { username })
+        //             const data = result.data
+        //             const userId = data[0].uuid
+
+        //             const get_room = await axios.post('https://backgamecard.vercel.app/get_rooms/id', { userId })
+        //             const data_pin = get_room.data
+        //             const pincode = selectedRoom
+        //             const get_room_pin = await axios.post('https://backgamecard.vercel.app/get_room/pincode', { pincode })
+        //             console.log(get_room_pin.data)
+        //             const existingScores = get_room_pin.data
+
+        //             scores.players.forEach(async (player, index) => {
+        //                 const playerData = existingScores.find(entry => entry.uuiduser === userId);
+        //                 const previousScore = playerData ? parseInt(playerData.score, 10) : 0;
+
+
+        //                 const totalScore = scores.score_total[index] + previousScore || 0;
+        //                 let oldpara = 0
+        //                 let scoresq = scores.score_total[index] || 0
+        //                 const roundScore = scores.score_thisturn[index]; // Assuming score_thisturn is the current round score
+
+        //                 if (scoresq > oldpara) {
+        //                     let score = scoresq - oldpara
+        //                     oldpara += score
+        //                     try {
+        //                         await axios.post('https://backgamecard.vercel.app/update_scores', { pincode, userId, score });
+        //                         console.log('Score updated successfully');
+
+        //                         const scoreElement = document.getElementById(`score-${player}-total`);
+        //                         if (scoreElement) {
+        //                             scoreElement.textContent = totalScore;
+        //                             console.log(`Updated DOM element with ID score-${player}-total to ${totalScore}`); // Debugging line
+        //                         } else {
+        //                             console.log(`No DOM element found for player ${player}, adding new row.`); // Debugging line
+        //                             const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
+        //                             const row = document.createElement('tr');
+        //                             row.id = `score-${player}`;
+        //                             row.innerHTML = `<td>${player}</td>
+        //                                          <td id="score-${player}-total">${totalScore}</td>
+        //                                          <td><button onclick="editScore('${player}')">Edit</button></td>`;
+        //                             scoresTable.appendChild(row);
+        //                         }
+        //                     } catch (error) {
+        //                         console.error(error);
+        //                     }
+        //                 }
+
+        //                 // Display the round score above "Your Hand" for the current player
+        //                 if (player === username) {
+        //                     const roundScoreDisplay = document.getElementById('roundScoreDisplay');
+        //                     roundScoreDisplay.innerHTML = `<strong>Your Round Score: ${roundScore}</strong>`;
+        //                 }
+        //             });
+
+        //         } catch (error) {
+        //             console.error(error);
+        //         }
+
+        //     }
+        // });
+
+        socket.on('updated_scores', scores => {
             console.log('Received updated scores:', scores); // Debugging line
-            const username = document.getElementById('username').value;
             if (scores) {
-                try {
-                    const result = await axios.post('https://backgamecard.vercel.app/get_user/name', { username })
-                    const data = result.data
-                    const userId = data[0].uuid
-
-                    const get_room = await axios.post('https://backgamecard.vercel.app/get_rooms/id', { userId })
-                    const data_pin = get_room.data
-                    const pincode = selectedRoom
-                    const get_room_pin = await axios.post('https://backgamecard.vercel.app/get_room/pincode', { pincode })
-                    console.log(get_room_pin.data)
-                    const existingScores = get_room_pin.data
-
-                    scores.players.forEach(async (player, index) => {
-                        const playerData = existingScores.find(entry => entry.uuiduser === userId);
-                        const previousScore = playerData ? parseInt(playerData.score, 10) : 0;
-
-
-                        const totalScore = scores.score_total[index] + previousScore || 0;
-                        let oldpara = 0
-                        let scoresq = scores.score_total[index] || 0
-                        const roundScore = scores.score_thisturn[index]; // Assuming score_thisturn is the current round score
-
-                        if (scoresq > oldpara) {
-                            let score = scoresq - oldpara
-                            oldpara += score
-                            try {
-                                await axios.post('https://backgamecard.vercel.app/update_scores', { pincode, userId, score });
-                                console.log('Score updated successfully');
-
-                                const scoreElement = document.getElementById(`score-${player}-total`);
-                                if (scoreElement) {
-                                    scoreElement.textContent = totalScore;
-                                    console.log(`Updated DOM element with ID score-${player}-total to ${totalScore}`); // Debugging line
-                                } else {
-                                    console.log(`No DOM element found for player ${player}, adding new row.`); // Debugging line
-                                    const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
-                                    const row = document.createElement('tr');
-                                    row.id = `score-${player}`;
-                                    row.innerHTML = `<td>${player}</td>
-                                                 <td id="score-${player}-total">${totalScore}</td>
-                                                 <td><button onclick="editScore('${player}')">Edit</button></td>`;
-                                    scoresTable.appendChild(row);
-                                }
-                            } catch (error) {
-                                console.error(error);
-                            }
-                        }
-
-                        // Display the round score above "Your Hand" for the current player
-                        if (player === username) {
-                            const roundScoreDisplay = document.getElementById('roundScoreDisplay');
-                            roundScoreDisplay.innerHTML = `<strong>Your Round Score: ${roundScore}</strong>`;
-                        }
-                    });
-
-                } catch (error) {
-                    console.error(error);
-                }
-
+                const username = document.getElementById('username').value;
+        
+                scores.players.forEach((player, index) => {
+                    const totalScore = scores.score_total[index];
+                    const roundScore = scores.score_thisturn[index]; // Assuming score_thisturn is the current round score
+                    console.log(`Updating score for player ${player}: ${totalScore}`); // Debugging line
+        
+                    const scoreElement = document.getElementById(`score-${player}-total`);
+        
+                    if (scoreElement) {
+                        scoreElement.textContent = totalScore;
+                        console.log(`Updated DOM element with ID score-${player}-total to ${totalScore}`); // Debugging line
+                    } else {
+                        console.log(`No DOM element found for player ${player}, adding new row.`); // Debugging line
+                        const scoresTable = document.getElementById('scoresTable').querySelector('tbody');
+                        const row = document.createElement('tr');
+                        row.id = `score-${player}`;
+                        row.innerHTML = `<td>${player}</td>
+                                         <td id="score-${player}-total">${totalScore}</td>
+                                         <td><button onclick="editScore('${player}')">Edit</button></td>`;
+                        scoresTable.appendChild(row);
+                    }
+        
+                    // Display the round score above "Your Hand" for the current player
+                    if (player === username) {
+                        const roundScoreDisplay = document.getElementById('roundScoreDisplay');
+                        roundScoreDisplay.innerHTML = `<strong>Your Round Score: ${roundScore}</strong>`;
+                    }
+                });
             }
         });
 
